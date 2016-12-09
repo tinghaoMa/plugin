@@ -1,0 +1,14 @@
+subprojects {
+    apply plugin: "groovy"
+
+    dependencies {
+        compile localGroovy()
+        compile gradleApi()
+    }
+
+    rootProject.dependencies {
+        println 'path ->'+path
+        println 'rootProject.name ->'+rootProject.name
+        runtime project(path)
+    }
+}
