@@ -1,0 +1,96 @@
+println "============================chapter_21.gradle==================================="
+
+println("app gradle apply from method ~hello I am chapter_21gradle")
+
+
+
+task helloE(dependsOn: ':gradledemo_app:installDebug') {
+    doLast {
+        println 'hello installDebug done'
+    }
+}
+//afterEvaluate 当所有任务有向图建立之后
+afterEvaluate {
+    installDebug.dependsOn(uninstallDebug)
+    tasks.getByName("installDebug") {
+        it.doFirst {
+            println "afterEvaluate installDebug begin"
+        }
+    }
+}
+
+
+
+gradle.buildFinished { buildResult ->
+    println "MTH  BUILD FINISHED"
+    println "MTH   build failure - " + buildResult.failure
+}
+
+task succeed {
+    doLast {
+        println "hello, world"
+    }
+}
+
+task fail {
+    doLast {
+        throw new Exception("Build failed")
+    }
+}
+
+//21.6. Notifications
+gradle.afterProject {
+    project, projectState ->
+        if (projectState.failure) {
+            println "--------------Evaluation of $project FAILED"
+        } else {
+            println "--------------Evaluation of $project SUCESS"
+        }
+}
+
+//21.7. Setting of certain property to all tasks
+
+tasks.whenTaskAdded { task ->
+    task.ext.srcDir = 'src/main/java'
+
+    println "whenTaskAdded ---" + task.name+'--task.project'+task.project
+}
+
+task a
+
+println "source dir is $a.srcDir"
+
+// 21.8.Logging of start and end of each task execution
+
+task ok
+
+task broken(dependsOn: ok) {
+    doLast {
+        throw new RuntimeException('broken')
+    }
+}
+
+gradle.taskGraph.beforeTask { Task task ->
+    println "executing $task ..."
+}
+
+gradle.taskGraph.afterTask { Task task, TaskState state ->
+    if (state.failure) {
+        println "FAILED"
+    } else {
+        println "done"
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+println "============================chapter_21.gradle==================================="

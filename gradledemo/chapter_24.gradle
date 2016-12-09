@@ -1,0 +1,52 @@
+println "============================chapter_24.gradle==================================="
+//https://docs.gradle.org/current/userguide/dependency_management.html
+println("app gradle apply from method ~hello I am chapter_24gradle")
+//24.1. Definition of a configuration
+//configurations {
+//    compile
+//}
+// 24.2. Accessing a configuration
+//println configurations.compile.name
+//println configurations['compile'].name
+
+//24.3. Configuration of a configuration
+configurations {
+    compile {
+        description = 'ole description compile classpath'
+        transitive = true
+    }
+    runtime {
+        extendsFrom compile
+    }
+}
+configurations.compile {
+    description = 'new description compile classpath'
+}
+println configurations.compile.description
+println configurations.runtime.name
+println configurations.runtime.description
+println configurations.runtime.transitive
+
+println configurations.androidJacocoAgent.description
+
+
+
+task listJars {
+    doLast {
+        configurations.compile.each {
+            File file ->
+                println 'listJars ---' + file.name
+        }
+    }
+}
+
+
+
+dependencies {
+    runtime files('libs/a.jar', 'libs/b.jar')
+}
+
+
+
+
+println "============================chapter_24.gradle==================================="

@@ -1,0 +1,14 @@
+println "============================chapter_23.gradle==================================="
+
+println("app gradle apply from method ~hello I am chapter_23gradle")
+
+logger.quiet('An info log message which is always logged.')
+logger.error('An error log message.')
+logger.warn('A warning log message.')
+logger.lifecycle('A lifecycle info log message.')
+logger.info('An info log message.')
+logger.debug('A debug log message.')
+logger.trace('A trace log message.')
+
+
+println "============================chapter_23.gradle==================================="

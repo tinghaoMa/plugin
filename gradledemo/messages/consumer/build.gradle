@@ -1,0 +1,25 @@
+//25.15. Dependencies and execution order
+task action {
+    doLast {
+        println("Consuming message: ${rootProject.producerMessage}")
+    }
+}
+
+//25.19. Cross project task dependencies
+//task consume(dependsOn: ':aProducer:produce') {
+//    doLast {
+//        println("Consuming message: ${rootProject.producerMessage}")
+//    }
+//}
+
+//25.20. Configuration time dependencies
+def message = rootProject.producerMessage
+
+task consume {
+    doLast {
+        println("Consuming message: " + message)
+    }
+}
+//25.21. Configuration time dependencies - evaluationDependsOn
+//解释下 这个的作用就是让aProducer优先于consumer先被解析
+evaluationDependsOn(':aProducer')

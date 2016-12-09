@@ -1,0 +1,70 @@
+include ':app', ':library', ':projecta', 'hello:app'
+
+
+def initSettingGradleEnvironment() {
+    println "initialize Setting Gradle Environment ....."
+    println "this is  setting.gradle"
+    println "initialize Setting Gradle Environment completes..."
+
+    //属性值从local.properites中读取
+    Properties properties = new Properties()
+    File propertyFile = new File(rootDir.getAbsolutePath() + "/local.properties")
+    properties.load(propertyFile.newDataInputStream())
+    //gradle就是gradle对象。它默认是Settings和Project的成员变量。可直接获取
+    //ext前缀，表明操作的是外置属性。api是一个新的属性名。前面说过，只在
+    //第一次定义或者设置它的时候需要ext前缀
+    gradle.ext.dir = properties.getProperty('sdk.dir')
+    gradle.ext.name = properties.getProperty('name')
+    gradle.ext.api = properties.getProperty('api')
+
+}
+//settings.gradle加载的时候，会执行initMinshengGradleEnvironment
+initSettingGradleEnvironment()
+
+//21.4. Modification of elements of the project tree
+def printlySetting() {
+
+    println '-----------------------------------------------------------------'
+
+            println '根目录 ---=' + settings.rootDir.absolutePath
+            rootProject.children.each { ProjectDescriptor p ->
+                println 'rootProject.child --name=' + p.name+'---path---'+p.getProjectDir().absolutePath
+            }
+            println 'hello:app的意思是相对于根目录hello/app'
+
+    println '-----------------------------------------------------------------'
+
+    println "gradle.dir=" + gradle.dir  //再次存取api的时候，就不需要ext前缀了
+    println "gradle.name=" + gradle.name
+    println "gradle.api=" + gradle.api
+
+    println '-----------------------------------------------------------------'
+
+    println "rootDir.name =" + rootDir.name
+    println 'rootDir.absolutePath = ' + rootDir.absolutePath
+    println "project(':app').name = " + project(':app').getProjectDir().absolutePath
+    println "project(':library').name = " + project(':library').getProjectDir().absolutePath
+    println "project('::projecta').name = " + project(':projecta').buildFile.absolutePath
+
+    println '---------------------------更改project名字--------------------------------------'
+
+    project(':library').name = "wo shi library"
+    project(':app').name = "gradledemo_app"
+    project(':hello:app').name = "hello_app"
+
+
+    println "In Setting.gradle, gradle id is " + gradle.hashCode()
+    println "Home Dir:" + gradle.gradleHomeDir
+    println "User Home Dir:" + gradle.gradleUserHomeDir
+    println "Parent: " + gradle.parent
+
+    println '-----------------------------------------------------------------'
+
+}
+
+printlySetting()
+
+
+
+
+

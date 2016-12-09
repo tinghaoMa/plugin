@@ -1,0 +1,46 @@
+apply plugin: 'com.android.application'
+//apply from: rootProject.getRootDir().getAbsolutePath() + "/utils.gradle" //也可以从这里引入
+//apply from: rootProject.getRootDir().getAbsolutePath() + "/chapter_17.gradle"
+//apply from: rootProject.getRootDir().getAbsolutePath() + "/chapter_18.gradle"
+//apply from: rootProject.getRootDir().getAbsolutePath() + "/chapter_19.gradle"
+//apply from: rootProject.getRootDir().getAbsolutePath() + "/chapter_20.gradle"
+//apply from: rootProject.getRootDir().getAbsolutePath() + "/chapter_21.gradle"
+//apply from: rootProject.getRootDir().getAbsolutePath() + "/chapter_23.gradle"
+//apply from: rootProject.getRootDir().getAbsolutePath() + "/chapter_25.gradle"
+apply from: rootProject.getRootDir().getAbsolutePath() + "/chapter_39.gradle"
+
+
+android {
+    compileSdkVersion gradle.api.toInteger()
+    buildToolsVersion "$BUILD_TOOLS_VERSION"
+    defaultConfig {
+        applicationId "com.mth.gradledemo"
+        minSdkVersion 16
+        targetSdkVersion gradle.api.toInteger()
+        versionCode 1
+        versionName "1.0"
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+}
+
+
+def b() {
+    println("app---------- gradle  second init ")
+    println " app  调用公共方法 = "+ getVersionNameAdvanced()
+    println buildTime()
+}
+
+b()
+
+//println " this is app gradle --"+springVersion
+
+

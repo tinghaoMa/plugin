@@ -1,0 +1,19 @@
+println "============================chapter_39.gradle==================================="
+
+println("Chapter 39. Writing Custom Task Classes")
+
+class GreetingTask extends DefaultTask {
+    String greeting ='Hello i am a custom task'
+
+    @TaskAction
+    def greet() {
+        println greeting
+    }
+}
+
+task hello(type: GreetingTask){
+    greeting='greeting task from hello task'
+}
+
+
+println "============================chapter_39.gradle==================================="

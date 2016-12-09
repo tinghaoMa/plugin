@@ -1,0 +1,84 @@
+//Closure cl = { task -> println "I'm $task.project.name" }
+//task hello << cl
+//project(':bluewhale') {
+//    task hello << cl
+//}
+
+//allprojects.each { pro ->
+//    println 'allprojects.name = ' + pro.name
+//}
+//
+//subprojects.each {pro ->
+//    println 'subprojects.name = ' + pro.name
+//}
+
+allprojects {
+    task hello {
+        doLast { task ->
+            println "allprojects I'm $task.project.name"
+        }
+    }
+}
+subprojects {
+    hello {
+        doLast {
+            println "- $it.project.name  I depend on water"
+        }
+        afterEvaluate { Project project ->
+            if (project.arctic) {
+                doLast {
+                    println project.name + '- I love to spend time in the arctic waters.'
+                }
+            }
+        }
+    }
+}
+
+//project(':bluewhale').hello {
+//    doLast {
+//        println "- I'm the largest animal that has ever lived on this planet."
+//    }
+//}
+
+//25.8. Adding custom behaviour to some projects (filtered by project name)
+
+//configure(subprojects.findAll {it.name != 'tropicalFish'}) {
+//    hello {
+//        doLast {
+//            println "- $it.project.name I love to spend time in the arctic waters."
+//        }
+//    }
+//}
+
+//configure(subprojects.findAll { it.name.equals('krill') }) {
+//    println 'findAll 在子工程里面找到了工程krill'
+//}
+//
+//configure(subprojects.find { it.name.equals('krill') }) {
+//    println 'find 在子工程里面找到了工程krill'
+//}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

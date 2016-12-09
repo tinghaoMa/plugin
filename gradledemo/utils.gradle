@@ -1,0 +1,18 @@
+println("app gradle apply from method ~hello I am utils.gradle")
+
+//utils.gradle中定义了一个获取AndroidManifests.xmlversionName的函数
+
+def getVersionNameAdvanced() {
+
+    println "公共方法抽取 getVersionNameAdvanced"
+    return "----调用成功"
+}
+
+
+
+ext {
+    getVersionNameAdvanced = this.&getVersionNameAdvanced
+
+}
+
+

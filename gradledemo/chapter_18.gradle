@@ -1,0 +1,357 @@
+println "============================chapter_18.gradle==================================="
+
+println("app gradle apply from method ~hello I am chapter_18gradle")
+
+/**
+ * 方式一
+ */
+/*task(hello) {
+    doLast {
+        println "hello chapter 18 first"
+    }
+}*/
+/**
+ * 方式二
+ */
+/*task('hello') {
+    doLast {
+        println "hello second"
+    }
+}*/
+
+/**
+ * 方式三
+ */
+/*
+tasks.create(name: 'hello') {
+    doLast {
+        println "hello third"
+    }
+}
+*/
+
+/**
+ * dest(目标文件夹)和source(源文件夹)都是相对于主app文件夹目录而言
+ *
+ * 拷贝：
+ *  1.如果源文件不存在直接跳过
+ *  2.如果目标文件不存在将创建
+ *  3.如果目标文件已经存在 再次执行将不执行
+ *  4.如果目标文件内容被更改 将再次执行
+ */
+def dest = "dest"
+
+task copyDemo(type: Copy) {
+    from 'source'
+    into dest
+}
+
+//如果目标文件不存在将创建 ，如果源文件不存在将不执行该task
+task(copyFile, type: Copy) {
+    from(file('src'))
+    into(file('dest'))
+    doLast {
+        println "copy buildDir = " + buildDir
+        println "copy file('src') path = " + file('src').absolutePath
+        println("copy end")
+    }
+}
+
+//18.5. Accessing tasks via tasks collection
+
+task hello
+
+println "hello.name = " + hello.name
+println "project.hello.name = " + project.hello.name
+println "tasks.hello.name = " + tasks.hello.name
+println "tasks['hello'].name = " + tasks['hello'].name
+println "tasks['hello'].getPath() = " + tasks['hello'].getPath()
+
+//18.6. Accessing tasks by path
+println "tasks.getByPath('hello').path = " + tasks.getByPath('hello').path
+println "tasks.getByPath(':hello').path = " + tasks.getByPath(':hello').path
+//println "tasks.getByPath(':library:hello').path = " + tasks.getByPath(':library:hello').path
+
+//18.7. Creating a copy task
+
+//task myCopy(type: Copy)
+/**
+ * 这种写法可读性不高
+ */
+//Copy myCopy = task(myCopy, type: Copy)
+//myCopy.doLast({
+//    println 'myCopy ----end'
+//})
+//
+//myCopy.from 'copysrc'
+//myCopy.into 'copydest'
+//myCopy.include('**/*.txt', '**/*.xml', '**/*.properties')
+
+/**
+ * 可读性高
+ */
+task myCopy(type: Copy)
+myCopy {
+    from 'copysrc'
+    into 'copydest'
+    include('**/*.txt', '**/*.xml', '**/*.properties')
+}
+
+/**
+ * task 依赖 可以依赖其他工程的task
+ */
+project(':app') {
+    task taskY {
+        doLast {
+            println 'taskY'
+        }
+    }
+}
+
+project(':library') {
+    task taskX(dependsOn: ':app:taskY') {
+        doLast {
+            println 'taskX'
+        }
+    }
+}
+
+task taskZ(dependsOn: [':library:taskX', ':projecta:taskA']) {
+    doLast {
+        println 'taskZ end'
+    }
+}
+
+//18.12. Adding dependency using task object
+
+task taskA {
+    doLast {
+        println 'taskA'
+    }
+}
+
+task taskB {
+    doLast {
+        println 'taskB'
+    }
+}
+
+taskB.dependsOn taskA
+
+//18.13. Adding dependency using closure
+
+task taskC {
+    doLast {
+        println 'taskC'
+    }
+}
+
+taskC.dependsOn {
+    tasks.findAll {
+        task -> task.name.startsWith('lib')
+    }
+}
+
+task lib1 {
+    doLast {
+        println 'lib1'
+    }
+}
+
+task lib2 {
+    doLast {
+        println 'lib2'
+    }
+}
+
+task notALib {
+    doLast {
+        println 'notALib'
+    }
+}
+
+//8.14. Adding a 'must run after' task ordering
+
+
+task taskD {
+    doLast {
+        println 'taskD'
+    }
+}
+task taskE {
+    doLast {
+        println 'taskE'
+    }
+}
+taskE.mustRunAfter taskD
+
+//18.17. A 'should run after' task ordering is ignored if it introduces an ordering cycle
+
+
+task taskF {
+    doLast {
+        println 'taskF'
+    }
+}
+task taskG {
+    doLast {
+        println 'taskG'
+    }
+}
+task taskH {
+    doLast {
+        println 'taskH'
+    }
+}
+taskF.dependsOn taskG
+taskG.dependsOn taskH
+taskH.shouldRunAfter taskF
+//18.18. Adding a description to a task
+
+task taskI {
+    description 'Copies the resource directory to the target directory.'
+    doLast {
+        println 'taskI  description' + taskI.description
+    }
+}
+
+//18.19. Overwriting a task
+task copyA(type: Copy)
+
+task copyA(overwrite: true) {
+    doLast {
+        println('I am the new one.')
+    }
+}
+
+//18.20. Skipping a task using a predicate
+//project.ext.skipHello = "false"
+
+task helloA {
+    doLast {
+        println 'onlyIf hello world'
+        println 'project.hasProperty(\'skipHello\')=' + project.hasProperty('skipHello')
+    }
+}
+
+helloA.onlyIf { !project.hasProperty('skipHello') }
+
+//18.21. Skipping tasks with StopExecutionException
+task compile {
+    doLast {
+        println 'We are doing the compile.'
+    }
+}
+
+compile.doFirst {
+    // Here you would put arbitrary conditions in real life.
+    // But this is used in an integration test so we want defined behavior.
+    if (true) {
+        throw new StopExecutionException()
+    }
+}
+task taskMy(dependsOn: 'compile') {
+    doLast {
+        println 'I am not affected'
+    }
+}
+
+//18.22. Enabling and disabling tasks
+println "taskMy.enabled = " + taskMy.enabled
+
+task disableMe {
+    doLast {
+        println 'This should not be printed if the task is disabled.'
+    }
+}
+disableMe.enabled = false
+
+//遍历文件
+// https://dongchuan.gitbooks.io/gradle-user-guide-/content/working_with_files/file_trees.html
+task taskJ {
+    doLast {
+        FileTree tree = fileTree('copySrc').include('**/*.xml')
+
+        // 访问文件数的元素
+        tree.visit {
+            element ->
+                println "$element.relativePath => $element.file"
+        }
+    }
+}
+
+
+
+//18.27. Inferred task dependency via task outputs
+
+//task packageFiles(type: Zip) {
+//    from myCopy.outputs
+//}
+
+task packageFiles(type: Zip) {
+    from myCopy
+}
+
+
+//18.36. Task rule
+tasks.addRule("Pattern: ping<ID>") { String taskName ->
+    if (taskName.startsWith("ping")) {
+        task(taskName) {
+            doLast {
+                println "Pinging: " + (taskName - 'ping')
+            }
+        }
+    }
+}
+task groupPing {
+    dependsOn pingServer1, pingServer2
+}
+
+
+
+//18.38. Adding a task finalizer 任务结束的时候回被自动加入到任务图表
+
+task taskK {
+    doLast {
+        println 'taskK'
+    }
+}
+task taskL {
+    doLast {
+        println ' end taskL'
+    }
+}
+
+taskK.finalizedBy taskL
+
+
+//18.39. Task finalizer for a failing task 即使遇到异常还是会被执行
+task taskM {
+    doLast {
+        println 'taskM'
+        throw new RuntimeException('卧槽 异常了')
+    }
+}
+task taskN {
+    doLast {
+        println '即使有异常 我也会执行 taskN'
+    }
+}
+
+taskM.finalizedBy taskN
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+println "============================chapter_18.gradle==================================="

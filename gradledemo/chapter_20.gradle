@@ -1,0 +1,62 @@
+println "============================chapter_20.gradle==================================="
+
+println("app gradle apply from method ~hello I am chapter_20gradle___" + project.name)
+
+//20.1. Using an Ant task
+task helloA {
+    doLast {
+        String greeting = ' hello from Ant'
+        ant.echo(message: greeting)
+    }
+}
+// 20.2. Passing nested text to an Ant task
+task helloAA {
+    doLast {
+        ant.echo('hello from Ant')
+    }
+}
+
+//20.3. Passing nested elements to an Ant task
+task zip {
+    doLast {
+        ant.zip(destfile: 'archive.zip') {
+            fileset(dir: 'src') {
+                include(name: '**.txt')
+                exclude(name: '**.xml')
+            }
+        }
+    }
+}
+
+//20.4. Using an Ant type  打印日志家上 ./gradlew list --info
+task list {
+    doLast {
+        def path = ant.path {
+            fileset(dir: 'libs', includes: '*.jar')
+        }
+        path.list().each {
+            println 'lib path - ' + it
+        }
+    }
+}
+
+
+ant.importBuild('build.xml')
+ant.importBuild('build_depends.xml')
+
+task intro(dependsOn: helloB) {
+    doLast {
+        println 'Hello, from Gradle'
+    }
+}
+
+helloB {
+    doLast {
+        println 'Hello, from Gradle'
+    }
+}
+
+
+
+
+println "============================chapter_20.gradle==================================="

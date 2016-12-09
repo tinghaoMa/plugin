@@ -1,0 +1,343 @@
+println "============================chapter_19.gradle==================================="
+
+println("app gradle apply from method ~hello I am chapter_19gradle")
+
+//19.1. Locating files
+// Using a relative path
+File configFile = file('src/config.xml')
+println configFile.exists()
+
+//19.2. Creating a file collection
+FileCollection collection = files('src/file1.txt',
+        new File('src/file2.txt'),
+        ['src/file3.txt', 'src/file4.txt'])
+
+//19.3. Using a file collection
+// Iterate over the files in the collection
+collection.each { File file ->
+    println "collection.each -> " + file.name
+}
+
+// Convert the collection to various types
+Set set = collection.files
+set.each { File file ->
+    println "set.each ->" + file.getName()
+
+}
+//Set set2 = collection as Set
+List listColl = collection as List
+
+listColl.each { File file ->
+    println "list.each ->" + file.getName()
+}
+String path = collection.asPath
+
+println "collection.asPath = " + collection.asPath
+
+println "----集合里面只有一个元素的时候--------否则会报异常"
+FileCollection collection2 = files('src/file1.txt')
+File singleFile = collection2.singleFile
+println "collection.singleFile -> " + singleFile
+
+File file2 = collection2 as File
+println "collection as File -> " + file2
+
+println "collection2 原本大小 ->" + collection2.size()
+/// Add and subtract collections
+def union = collection2 + files('src/file3.txt')
+println "union.size() 加操作符 ->" + union.size()
+
+def different = collection2 - files('src/file3.txt')
+println "different.size() 减操作符 ->" + different.size()
+
+different.each { element ->
+    println "是否是一个文件-----> $element.file" + "文件的名字-->$element.name"
+}
+
+//19.4. Implementing a file collection 
+task list {
+    doLast {
+        File srcDir
+
+        // Create a file collection using a closure
+        FileCollection fileCollection = files { srcDir.listFiles() }
+
+        srcDir = file('copysrc')
+        println "Contents of $srcDir.name"
+        fileCollection.collect { relativePath(it) }.sort().each { println it }
+
+        srcDir = file('copydest')
+        println "Contents of $srcDir.name"
+        fileCollection.collect { relativePath(it) }.sort().each { println it }
+    }
+}
+
+//19.5. Creating a file tree
+
+String mainPath = file('src/main').absolutePath
+println "mainPath -> " + mainPath
+// Create a file tree with a base directory
+FileTree tree = fileTree('src') {
+    include '**/*.xml', '**/*.txt'
+    exclude '**/s*.xml', '**/A*.xml'
+}
+
+
+tree.each { File file ->
+    println "fileTree - > " + file.name + " --path->" + file.absolutePath
+}
+
+//19.6. Using a file tree 遍历
+
+// Filter a tree
+FileTree filtered = tree.matching {
+    include '*/values/**'
+}
+println "filtered.size() = " + filtered.size()
+
+filtered.each { File file ->
+    println "filtered - > " + file.name
+}
+
+// Add trees together
+FileTree sum = tree + fileTree(dir: 'add')
+
+// Visit the elements of the tree
+sum.visit { element ->
+    println "visit--加操作符-->$element.relativePath => $element.file"
+}
+
+//19.7. Using an archive as a file tree
+// Create a ZIP file tree using path
+FileTree zip = zipTree('someFile.zip')
+zip.each { File file ->
+    println "zipTree - > " + file.name
+}
+
+// Create a TAR file tree using path
+FileTree tar = tarTree('copysrc.tar')
+
+println "tarTree size = " + tar.size()
+tar.each { File file ->
+    println "tarTree - > " + file.name
+}
+
+//tar tree attempts to guess the compression based on the file extension
+//however if you must specify the compression explicitly you can:
+FileTree someTar = tarTree(resources.gzip('Demo.tar.gz'))
+someTar.each { File file ->
+    println "someTar resources.gzip - > " + file.name
+}
+
+//19.10. Specifying copy task source files and destination directory
+
+
+task myCopy(type: Copy) {
+    from 'copysrc'
+    into 'copydest'
+    include('**/*.txt', '**/*.xml', '**/*.properties')
+}
+
+def getSrcDir(srcDirName) {
+    println 'srcDirName = ' + srcDirName
+    return project.file(srcDirName)
+}
+
+task anotherCopyTask(type: Copy) {
+    // Copy everything under src/main/webapp
+    from 'src/main/java'
+    // Copy a single file
+    from 'src/file1.txt'
+    // Copy the output of a task using Task outputs explicitly.
+    from myCopy.outputs
+    // Copy the contents of a Zip file
+    from zipTree('someFile.zip')
+    // Determine the destination directory later
+    into file() {
+        getSrcDir('anotherCopyDest')
+    }
+    doLast {
+        println 'anotherCopyTask  has done'
+    }
+}
+
+//19.11. Selecting the files to copy
+//details.file.text 文件的文版内容
+task copytaskWithPatterns(type: Copy) {
+    from 'src'
+    into 'copydestaskWithPatterns'
+    include '**/*.xml'
+    include '**/*.java'
+    exclude { details ->
+        if (details.file.isFile()) {
+            details.file.name.endsWith('.txt') &&
+                    details.file.text.contains('Android')
+            println 'copytaskWithPatterns details.file.name = ' + details.file.name
+            println 'copytaskWithPatterns details.file.text = ' + details.file.text
+        }
+    }
+    exclude '**/mipmap*'
+}
+
+//19.12. Copying files using the copy() method without up-to-date check
+//不是一个task 所以不会检查目标文件是否已经存在而是每次都复制
+task copyMethod {
+    doLast {
+        copy {
+            from 'copysrc'
+            into 'copyMethod'
+            include '**/*.xml'
+            include '**/*.txt'
+        }
+        println 'copyMethod has done '
+    }
+}
+//app:copyMethod UP-TO-DATE
+task copyTask(type: Copy) {
+    from 'copysrc'
+    into 'copyMethod'
+    include '**/*.xml'
+    include '**/*.txt'
+    doLast {
+        println 'copyMethod has done '
+    }
+}
+
+//19.13. Copying files using the copy() method with up-to-date check
+task copyMethodWithExplicitDependencies {
+    // up-to-date check for inputs, plus add copyTask as dependency
+    inputs.file copyTask
+    outputs.dir 'some-dir' // up-to-date check for outputs
+    doLast {
+        copy {
+            // Copy the output of copyTask
+            from copyTask
+            into 'some-dir'
+        }
+        println "copyMethodWithExplicitDependencies has done"
+    }
+}
+
+//19.6.1. Renaming files
+
+task rename(type: Copy) {
+    from 'src/main'
+    into 'renametask'
+    // Use a closure to map the file name
+    rename { String fileName ->
+        fileName.replace('.xml', '.txt')
+    }
+    // Use a regular expression to map the file name
+//    rename '(.+)-staging-(.+)', '$1$2'
+//    rename(/(.+)-staging-(.+)/, '$1$2')
+}
+
+//19.6.3. Using the CopySpec class
+
+configurations {
+    compile {
+        description = 'compile classpath'
+        transitive = true
+    }
+    runtime {
+        extendsFrom compile
+    }
+}
+
+println 'configurations.compile.name = ' + configurations.compile.name
+println 'configurations[\'compile\'].name = ' + configurations['compile'].name
+println 'configurations.runtime  =' + configurations.runtime
+
+task nestedSpecs(type: Copy) {
+    into 'build/explodedWar'
+    exclude '**/*.txt*'
+    from('src') {
+        include '**/*.xml'
+    }
+    into('nestedSpecs') {
+        from configurations.runtime
+    }
+}
+
+// 19.17. Using the Sync task to copy dependencies
+println "$buildDir.absolutePath"
+
+task libs(type: Sync) {
+    from configurations.runtime
+    into "$buildDir/libs"
+}
+
+//19.18. Creating a ZIP archive
+//创建一个zip文件从src/dist文件夹里面 并且把运行时的配置拷贝到libs文件夹里面
+task zipFile(type: Zip) {
+    from 'src/dist'
+    into('libs') {
+        from configurations.runtime
+    }
+}
+
+
+
+//19.21. Configuration of archive task - appendix & classifier
+//自定义后缀 gradle-wrapper-1.0-src.zip
+archivesBaseName = 'gradle'
+version = 1.0
+
+task myZip(type: Zip) {
+    appendix = 'wrapper'
+    classifier = 'src'
+    from 'copysrc'
+    into('libs') {
+        from configurations.runtime
+    }
+    destinationDir file('build/zip') //zip目的地
+}
+
+
+println 'myZip.archiveName = ' + myZip.archiveName
+println 'relativePath(myZip.destinationDir) = ' + relativePath(myZip.destinationDir)
+println 'relativePath(myZip.archivePath) = ' + relativePath(myZip.archivePath)
+
+
+
+
+
+
+task appStart(type: Exec, dependsOn: 'installDebug') {
+    commandLine 'adb', 'shell', 'am', 'start', '-n', 'com.mth.gradledemo/com.mth.gradledemo.MainActivity'
+
+}
+
+def apkName = 'SohuVideo'
+def srcDir = '/sdcard/test/'
+
+
+task preTask(type: Sync, dependsOn: 'assembleDebug') {
+    FileTree fileTree = fileTree('build') {
+        include '**/*.apk'
+    }
+    from fileTree
+    into 'build'
+    rename { String fileName ->
+        fileName.replace(archivesBaseName+'-debug', apkName)
+    }
+
+    doLast {
+        println 'copyApk apk to sdcard 准备'
+    }
+}
+
+task push(type: Exec, dependsOn: 'preTask') {
+    doLast {
+        println 'copyApk apk to sdcard done'
+    }
+    commandLine 'adb', 'push', 'build/outputs/apk/' + apkName + '.apk', srcDir + apkName + '.apk'
+}
+
+
+
+
+
+
+
+println "============================chapter_19.gradle==================================="

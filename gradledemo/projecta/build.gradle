@@ -1,0 +1,31 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion gradle.api.toInteger()
+    buildToolsVersion "$BUILD_TOOLS_VERSION"
+
+    defaultConfig {
+        applicationId "com.mth.projecta"
+        minSdkVersion 16
+        targetSdkVersion gradle.api.toInteger()
+        versionCode 1
+        versionName "1.0"
+
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+}
+
+task taskA{
+    doLast{
+        println " this from project taskA"
+    }
+}

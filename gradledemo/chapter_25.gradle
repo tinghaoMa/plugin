@@ -1,0 +1,46 @@
+println "============================chapter_25.gradle==================================="
+
+println("Chapter 25. Multi-project Builds")
+
+
+
+gradle.taskGraph.whenReady {
+    taskGraph ->
+        if (taskGraph.hasTask(D)) {
+            println "含有任务D"
+        }
+        taskGraph.afterTask {
+            println it.name + ' Done'
+        }
+
+        taskGraph.beforeTask {
+            println "Excute  " + it.name + '...'
+        }
+
+}
+task D << {
+    println "Chapter 25.  DDDDDDDDDDDDDDDDDDDD"
+}
+
+
+task B << {
+    println "Chapter 25.  BBBBBBBBBBBBBBBBBBBBBBBBBB"
+
+}
+
+task C << {
+    println "Chapter 25. CCCCCCCCCCCCCCCCCCCCCCCCCCCCC"
+
+}
+
+D.dependsOn B
+
+tasks.whenTaskAdded {
+    task ->
+        if (task.name.equals('assembleDebug')) {
+            B.dependsOn C
+        }
+}
+
+
+println "============================chapter_25.gradle==================================="

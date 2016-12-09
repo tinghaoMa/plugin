@@ -1,0 +1,95 @@
+println "============================chapter_17.gradle==================================="
+
+println("app gradle apply from method ~hello I am chapter_17.gradle")
+
+//17.1
+println "name = " + name
+println "project.name = " + project.name
+println "project.path = " + project.path
+println "projectDir.absolutePath =" + project.projectDir.absolutePath
+println "project DEFAULT_BUILD_DIR_NAME =" + DEFAULT_BUILD_DIR_NAME
+
+def name = "MTH"
+println "def name = " + name
+println "project.name = " + project.name
+
+//17.2. Using local variables
+
+//拷贝任务 如果目标文件不存在将创建 如果源文件不存在不会拷贝 如果目标文件已经存在将只拷贝不同的文件
+//def dest = "dest"
+//
+//task copy(type: Copy) {
+//    from "source"
+//    into dest
+//}
+
+
+//Example 17.3. Using extra properties
+
+
+ext {
+    springVersion = "3.1.0.RELEASE"
+    emailNotification = "build@master.org"
+}
+
+sourceSets.all { ext.purpose = null }
+
+sourceSets {
+    main {
+        purpose = "production"
+    }
+    test {
+        purpose = "test"
+    }
+    plugin {
+        purpose = "production"
+    }
+}
+
+task printProperties  {
+    doLast {
+        println springVersion
+        println emailNotification
+        sourceSets.matching { it.purpose == "production" }.each { println it.name }
+
+    }
+}
+
+//17.4. Configuring arbitrary objects
+task configure {
+    doLast {
+        def pos = configure(new java.text.FieldPosition(10)) {
+            beginIndex = 1
+            endIndex = 5
+        }
+        println pos.beginIndex
+        println pos.endIndex
+    }
+}
+
+
+//Configuring arbitrary objects using a script
+
+
+task configureFromaUtilsGradle {
+    doLast {
+        def pos = new java.text.FieldPosition(10)
+        // Apply the script
+        apply from: rootProject.getRootDir().getAbsolutePath()+'/utils.gradle', to: pos
+        println pos.beginIndex
+        println pos.endIndex
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+println "============================chapter_17.gradle==================================="

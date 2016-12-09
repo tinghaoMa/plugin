@@ -1,0 +1,259 @@
+// Top-level build file where you can add configuration options common to all sub-projects/modules.
+subprojects {
+    println "subprojects Configure for $project.name"//遍历子Project，project变量对应每个子Project
+    buildscript {
+        repositories {
+            jcenter()
+        }
+        dependencies {
+            classpath 'com.android.tools.build:gradle:2.2.2'
+            apply from: rootProject.getRootDir().getAbsolutePath() + "/utils.gradle"
+            //(该位置是全局)有点继承的意思 可以从这里引入 也可以从其他build.gradle引入
+        }
+    }
+}
+allprojects {
+    repositories {
+        jcenter()
+    }
+
+//21.5. Adding of test task to each project which has certain property set
+    afterEvaluate { project ->
+        if (project.name.equals('hello') && project.hasTests) {
+            println "******************************Adding helloBaby task to $project"
+            project.task('helloBaby') {
+                doLast {
+                    println "--------------Running helloBaby for $project"
+                }
+            }
+        }
+    }
+
+}
+
+task clean(type: Delete) {
+    delete rootProject.buildDir
+}
+
+//task helloB(dependsOn: 'helloA' ) << {
+//    println 'Hello world BBBBBBBBBB!'
+//}
+//
+//task helloA <<{
+//    println(" hello world AAAAAAAAAA")
+//}
+
+//task helloA <<{
+//    println(" hello world AAAAAAAAAA")
+//}
+//
+//task helloB << {
+//    println 'Hello world BBBBBBBBBB!'
+//}
+//
+//helloA.dependsOn helloB
+
+//自定义属性
+//task myTask {
+//    ext.myProperty = "myValue_test"
+//}
+//
+//task printTaskProperties << {
+//    println myTask.myProperty
+//}
+
+//task loadfile << {
+//    def files = file('../gradletaskdemo/src/main/').listFiles().sort()
+//    files.each { File file ->
+//        if (file.isFile()) {
+//            ant.loadfile(srcFile: file, property: file.name)
+//            println " *** $file.name ***"
+//        }
+//    }
+//}
+//
+//task printProps {
+//    doLast {
+//        println guestName
+//        println "hello, "+guestName
+//    }
+//}
+//
+//ext {
+//    guestName='MTH'
+//}
+
+
+def a() {
+    println("project --------------------gradle  first init")
+    println("rootProject.buildDir =" + rootProject.buildDir)
+    println("rootProject.rootDir =" + rootProject.getRootDir())
+}
+
+a()
+
+//定义公共方法二
+import java.text.SimpleDateFormat
+
+gradle.allprojects {
+    ext.buildTime = {
+        def df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'")
+        df.setTimeZone(TimeZone.getTimeZone("UTC"))
+        return df.format(new Date())
+    }
+}
+
+//4.1
+task compile {
+    doLast {
+        println 'compiling source'
+    }
+}
+
+task compileA(dependsOn: compile) {
+    description = '这是我的注释~是不是很完美'
+    doLast {
+        println 'compiling unit tests'
+    }
+}
+
+task A(dependsOn: [compileA, compile]) {
+    doLast {
+        println 'running unit tests'
+    }
+}
+
+task dist(dependsOn: [A, compileA]) {
+    doLast {
+        println 'building the distribution'
+    }
+}
+
+
+task printProps {
+    doLast {
+        println gradlePropertiesProp
+        println sysProp
+        println envProjectProp
+        println System.properties['system']
+    }
+}
+
+//15.10
+task hello {
+    doLast {
+        println 'Hello Earth'
+    }
+}
+hello.doFirst {
+    println 'Hello Venus'
+}
+hello.doLast {
+    println 'Hello Mars'
+}
+
+hello {
+    doLast {
+        println 'Hello Jupiter'
+    }
+}
+
+//15.12
+task myTask {
+    ext.myProperty = "myValue"
+}
+
+task printTaskProperties {
+    doLast {
+        println myTask.myProperty
+    }
+}
+
+//15.14
+task checksum {
+    doLast {
+        fileList('./app').each { File file ->
+            ant.checksum(file: file, property: "cs_$file.name")
+            println "$file.name Checksum: ${ant.properties["cs_$file.name"]}"
+        }
+    }
+}
+
+task loadfile {
+    doLast {
+        fileList('./app').each { File file ->
+            ant.loadfile(srcFile: file, property: file.name)
+            println "I'm fond of $file.name"
+        }
+    }
+}
+
+File[] fileList(String dir) {
+    file(dir).listFiles({ file -> file.isFile() } as FileFilter).sort()
+}
+
+//15.16
+
+task m << {
+    println 'mmmmmmmmmmmmmmmmm'
+}
+
+
+task distribution(dependsOn: 'm') {
+    doLast {
+        println "We build the zip with version=$version"
+    }
+}
+
+task release(dependsOn: 'distribution') {
+    doLast {
+        println 'We release now'
+    }
+}
+
+
+gradle.taskGraph.whenReady {
+    taskGraph ->
+        if (taskGraph.hasTask(release)) {
+            version = '1.0'
+        } else {
+            version = '1.0-SNAPSHOT'
+        }
+        gradle.taskGraph.getAllTasks().each {
+            println 'it.name = ' + it.name
+        }
+
+}
+
+//15.4
+task upper {
+    doLast {
+        String someString = 'mY_nAmE'
+        println "Original: " + someString
+        println "Upper case: " + someString.toUpperCase()
+    }
+}
+
+//15.15
+defaultTasks 'cleanA', 'run'
+
+task cleanA {
+    doLast {
+        println 'DefaultA Cleaning!'
+    }
+}
+
+task run {
+    doLast {
+        println 'Default Running!'
+    }
+}
+
+task other {
+    doLast {
+        println "I'm not a default task!"
+    }
+}
+
+
+
