@@ -1,0 +1,129 @@
+apply plugin: 'java'
+
+//repositories {
+//    mavenCentral()
+//}
+//
+//dependencies {
+//    intTestCompile 'junit:junit:4.12'
+//    intTestRuntime 'org.ow2.asm:asm-all:4.0'
+//}
+//
+//task intTestJar(type: Jar) {
+//    from sourceSets.intTest.output
+//}
+//
+//task intTestJavadoc(type: Javadoc) {
+//    source sourceSets.intTest.allJava
+//}
+//
+
+
+//46.3. Accessing a source set
+// Various ways to access the main source set
+println sourceSets.main.output.classesDir
+//println sourceSets['main'].output.classesDir
+sourceSets {
+    println main.output.classesDir
+}
+sourceSets {
+    main {
+        println 'output.classesDir = ' + output.classesDir
+        println 'output.resourcesDir = ' + output.resourcesDir
+    }
+}
+println '====================================================================='
+//46.7.2. Defining new source sets
+sourceSets {
+    mth
+}
+
+dependencies {
+    compile 'com.google.code.gson:gson:2.2.4'
+}
+
+
+sourceSets.all {
+    println "name = " + name
+}
+println '====================================================================='
+
+sourceSets {
+    mth {
+        println 'java.name = ' + java.name
+        println java.files.size()
+        java.files.each { File temp ->
+            println 'java.absolutePath = ' + temp.absolutePath
+        }
+
+        println '====================================================================='
+        println 'resources.name = ' + resources.name
+        println resources.files.size()
+        resources.files.each { File temp ->
+            println 'resources.absolutePath = ' + temp.absolutePath
+        }
+        println getRootDir().absolutePath
+    }
+
+}
+
+sourceSets {
+    main {
+        java {
+            srcDirs = ['src/mth/java']
+        }
+        resources {
+            srcDirs = ['src/mth/resources']
+        }
+    }
+}
+
+////46.8. Assembling a JAR for a source set
+//task intTestJar(type: Jar) {
+//    from sourceSets.mth.output
+//}
+//
+//
+////46.9. Generating the Javadoc for a source set
+task intTestJavadoc(type: Javadoc) {
+    source sourceSets.mth.allJava
+}
+
+//task intTest(type: Test) {
+//    testClassesDir = sourceSets.mth.output.classesDir
+//    println 'testClassesDir = '+sourceSets.mth.output.classesDir.path
+//    classpath = sourceSets.mth.runtimeClasspath
+//    println 'classpath = '+sourceSets.mth.runtimeClasspath
+//}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
