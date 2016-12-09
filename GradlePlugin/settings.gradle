@@ -1,1 +1,1 @@
-include ':app', ':plugin', ':buildsrc'
+include ':app', ':plugin'
