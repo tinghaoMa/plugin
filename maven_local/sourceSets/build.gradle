@@ -18,7 +18,7 @@ apply plugin: 'java'
 //}
 //
 
-
+println '====================================================================='
 //46.3. Accessing a source set
 // Various ways to access the main source set
 println sourceSets.main.output.classesDir
@@ -28,8 +28,12 @@ sourceSets {
 }
 sourceSets {
     main {
-        println 'output.classesDir = ' + output.classesDir
-        println 'output.resourcesDir = ' + output.resourcesDir
+        println 'main output.classesDir = ' + output.classesDir
+        println 'main output.resourcesDir = ' + output.resourcesDir
+    }
+    test {
+        println 'test output.classesDir = ' + output.classesDir
+        println 'test output.resourcesDir = ' + output.resourcesDir
     }
 }
 println '====================================================================='
@@ -58,11 +62,11 @@ sourceSets {
 
         println '====================================================================='
         println 'resources.name = ' + resources.name
-        println resources.files.size()
+        println 'resources.files.size()'+resources.files.size()
         resources.files.each { File temp ->
             println 'resources.absolutePath = ' + temp.absolutePath
         }
-        println getRootDir().absolutePath
+        println "getRootDir().absolutePath = " +getRootDir().absolutePath
     }
 
 }
@@ -95,15 +99,6 @@ task intTestJavadoc(type: Javadoc) {
 //    classpath = sourceSets.mth.runtimeClasspath
 //    println 'classpath = '+sourceSets.mth.runtimeClasspath
 //}
-
-
-
-
-
-
-
-
-
 
 
 
