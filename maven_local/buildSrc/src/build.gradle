@@ -18,7 +18,7 @@ repositories {
 
 uploadArchives {
     repositories.mavenDeployer {
-        repository(url: uri("/tmp/repo"))
+        repository(url: uri("file:repo/"))
         pom.groupId = 'com.hello.mth'
         pom.artifactId = 'hello'
         pom.version = '1.0.1'
